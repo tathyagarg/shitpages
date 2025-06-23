@@ -2,13 +2,15 @@
   import "../app.css";
 
   import Navbar from "$lib/components/Navbar.svelte";
+  import type { LayoutProps } from "./$types";
 
-  let { children } = $props();
+  let { data, children }: LayoutProps = $props();
+  let { user } = data;
 </script>
 
 <div
   class="min-h-screen min-w-screen overflow-x-hidden bg-cat-base font-default text-cat-text"
 >
-  <Navbar />
+  <Navbar {user} />
   {@render children()}
 </div>
