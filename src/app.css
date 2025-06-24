@@ -28,6 +28,8 @@
   --color-cat-mantle: #1e2030;
   --color-cat-crust: #181926;
 
+  --color-cat-border-surf0: color-mix(in oklab, var(--color-cat-surface0) 80%, transparent);
+
   --font-default: 'Inter', sans-serif;
   --font-mono: 'Courier New', monospace;
 

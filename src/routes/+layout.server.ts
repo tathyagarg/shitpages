@@ -1,15 +1,19 @@
 import type { LayoutServerLoad } from './$types';
-import { db } from '$lib/server/db';
+import type { Cookies } from '@sveltejs/kit';
 
-export const load: LayoutServerLoad = async ({ cookies }: {
-  cookies: {
-    get: (name: string) => string | undefined;
-    set: (name: string, value: string, options?: { httpOnly?: boolean; secure?: boolean; path?: string; sameSite?: 'strict' | 'lax' | 'none'; maxAge?: number }) => void;
-  };
+import { db } from '$lib/server/db';
+import { setCache, getCache } from '$lib/server/cache';
+
+export const load: LayoutServerLoad = async ({ cookies, url }: {
+  url: URL,
+  cookies: Cookies
 }) => {
+  const searchParams = url.searchParams;
+  const error = searchParams.get('error');
+
   const sessionToken = cookies.get('session');
   if (!sessionToken) {
-    return { user: null };
+    return { user: null, error };
   }
 
   const userAccessToken = await db.query.sessions.findFirst({
@@ -18,10 +22,14 @@ export const load: LayoutServerLoad = async ({ cookies }: {
   });
 
   if (!userAccessToken) {
-    return { user: null };
+    return { user: null, error };
   }
 
-  console.log('User Access Token:', userAccessToken.accessToken);
+  const testUserData = getCache(userAccessToken.accessToken);
+
+  if (testUserData) {
+    return { user: testUserData, error };
+  }
 
   const userRes = await fetch('https://slack.com/api/openid.connect.userInfo', {
     method: 'GET',
@@ -32,13 +40,18 @@ export const load: LayoutServerLoad = async ({ cookies }: {
 
   const userData = await userRes.json();
 
-  console.log('User Data:', userData);
+  setCache(userAccessToken.accessToken, {
+    id: userData.sub,
+    username: userData.name,
+    avatar: userData.picture
+  }, 60 * 60 * 1000);
 
   return {
     user: {
       id: userData.sub,
       username: userData.name,
       avatar: userData.picture,
-    }
+    },
+    error
   }
 };
