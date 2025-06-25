@@ -11,12 +11,14 @@ export const load = async ({ parent }: { parent: any }) => {
 
   const user_id = data?.user?.id;
 
-  const subdomain = await db.query.user.findFirst({
+  const subdomainData = await db.query.user.findFirst({
     where: (user, { eq }) => eq(user.id, user_id),
     columns: {
       subdomain: true
     }
   });
+
+  const subdomain = subdomainData?.subdomain;
 
   if (!subdomain) {
     throw redirect(302, '/claim');
