@@ -6,8 +6,6 @@
     username: string;
     avatar: string;
   } | null = null;
-
-  console.log("User data:", user);
 </script>
 
 <div

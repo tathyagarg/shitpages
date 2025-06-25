@@ -1,12 +1,13 @@
 import { CLIENT_SECRET, CLIENT_ID } from "$env/static/private";
-import { json, redirect } from "@sveltejs/kit";
+import { json, redirect, type Cookies } from "@sveltejs/kit";
 
 import { db } from "$lib/server/db";
 import { user } from "$lib/server/db/schema";
 
-export const GET = async ({ url, cookies, fetch }: {
+export const GET = async ({ url, cookies, fetch, locals }: {
   url: URL,
-  cookies: { get: (name: string) => string | undefined, set: (name: string, value: string, options?: { httpOnly?: boolean, secure?: boolean, path?: string, sameSite?: 'strict' | 'lax' | 'none', maxAge?: number }) => void },
+  cookies: Cookies
+  locals: any,
   fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 }) => {
   const code = url.searchParams.get('code');
@@ -37,20 +38,31 @@ export const GET = async ({ url, cookies, fetch }: {
 
   const sessionToken = crypto.randomUUID();
 
-  await db.insert(user).values({
-    uuid: data.authed_user.id,
-    accessToken: data.authed_user.access_token,
-    id: data.authed_user.id,
-    subdomain: null,
-  });
+  try {
+    await db.insert(user).values({
+      uuid: sessionToken,
+      accessToken: data.authed_user.access_token,
+      id: data.authed_user.id,
+      subdomain: null,
+    });
 
-  cookies.set('session', sessionToken, {
-    httpOnly: true,
-    secure: true,
-    path: '/',
-    sameSite: 'strict',
-    maxAge: 60 * 60 * 24 * 30 // 30 days
-  });
+    locals.user = {
+      id: data.authed_user.id,
+      username: data.authed_user.name,
+      avatar: data.authed_user.image_192 || null,
+      subdomain: null
+    }
+  } finally {
 
-  throw redirect(302, '/');
+    cookies.set('session', sessionToken, {
+      httpOnly: true,
+      secure: true,
+      path: '/',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30 // 30 days
+    });
+
+    throw redirect(302, '/');
+  }
+
 }
