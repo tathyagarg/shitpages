@@ -1,1 +1,3 @@
-// place files you want to import through the `$lib` alias in this folder.
+export const error_messages: Record<string, string> = {
+  'not-auth': 'You must be logged in to access that page.',
+}

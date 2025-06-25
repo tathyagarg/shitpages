@@ -6,10 +6,12 @@
     username: string;
     avatar: string;
   } | null = null;
+
+  console.log("User data:", user);
 </script>
 
 <div
-  class="absolute top-0 left-0 px-8 py-4 text-cat-text hover:text-cat-subtext1 flex items-center gap-4 w-full font-semibold text-lg"
+  class="px-8 py-4 text-cat-text hover:text-cat-subtext1 flex items-center gap-4 w-full font-semibold text-lg z-10"
 >
   <div class="flex items-center gap-12 flex-1">
     <Navelement href="/" label="Home" />
