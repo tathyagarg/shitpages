@@ -8,8 +8,8 @@ export const handle = async ({ event, resolve }) => {
     return await resolve(event);
   }
 
-  const userAccessToken = await db.query.sessions.findFirst({
-    where: (sessions, { eq }) => eq(sessions.uuid, token),
+  const userAccessToken = await db.query.user.findFirst({
+    where: (user, { eq }) => eq(user.uuid, token),
     columns: { accessToken: true }
   });
 
@@ -31,10 +31,20 @@ export const handle = async ({ event, resolve }) => {
   });
   const userData = await userRes.json();
 
+  const user_id = userData.sub;
+
+  const subdomain = await db.query.user.findFirst({
+    where: (user, { eq }) => eq(user.id, user_id),
+    columns: {
+      subdomain: true
+    }
+  });
+
   const user = {
     id: userData.sub,
     username: userData.name,
-    avatar: userData.picture
+    avatar: userData.picture,
+    subdomain: subdomain?.subdomain || null
   };
 
   setCache(userAccessToken.accessToken, user, 60 * 60 * 1000);

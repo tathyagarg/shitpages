@@ -1,6 +1,6 @@
 <script lang="ts">
   import ArrowDown from "~icons/mdi/arrow-down";
-  import { error_messages } from "$lib";
+  import { error_messages, success_messages } from "$lib";
 
   let { data } = $props();
 </script>
@@ -11,6 +11,14 @@
   >
     <b>Error: </b>
     <span>{error_messages[data.error]}</span>
+  </div>
+{/if}
+{#if data.success}
+  <div
+    class="p-2 bg-cat-green/50 rounded-md mx-8 border-l-8 border-2 border-cat-green"
+  >
+    <b>Success: </b>
+    <span>{success_messages[data.success]}</span>
   </div>
 {/if}
 <section

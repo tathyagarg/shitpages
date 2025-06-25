@@ -2,8 +2,10 @@
   import Directory from "$lib/components/tree/Directory.svelte";
   import File from "$lib/components/tree/File.svelte";
 
+  import type { FileData } from "$lib/types";
+
   const { data } = $props();
-  const { pages } = data;
+  const { pages }: { pages: FileData[] } = data;
 </script>
 
 <section class="w-screen h-screen p-24">

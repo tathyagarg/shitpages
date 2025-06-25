@@ -2,7 +2,7 @@ import { CLIENT_SECRET, CLIENT_ID } from "$env/static/private";
 import { json, redirect } from "@sveltejs/kit";
 
 import { db } from "$lib/server/db";
-import { sessions } from "$lib/server/db/schema";
+import { user } from "$lib/server/db/schema";
 
 export const GET = async ({ url, cookies, fetch }: {
   url: URL,
@@ -35,14 +35,16 @@ export const GET = async ({ url, cookies, fetch }: {
 
   console.log('Slack OAuth response:', data);
 
-  const sesstionToken = crypto.randomUUID();
+  const sessionToken = crypto.randomUUID();
 
-  await db.insert(sessions).values({
-    uuid: sesstionToken,
+  await db.insert(user).values({
+    uuid: data.authed_user.id,
     accessToken: data.authed_user.access_token,
-  })
+    id: data.authed_user.id,
+    subdomain: null,
+  });
 
-  cookies.set('session', sesstionToken, {
+  cookies.set('session', sessionToken, {
     httpOnly: true,
     secure: true,
     path: '/',
